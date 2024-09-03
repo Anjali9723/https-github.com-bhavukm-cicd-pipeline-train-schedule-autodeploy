@@ -1,79 +1,57 @@
 pipeline {
     agent any
+    
     environment {
-        
-        DOCKER_IMAGE_NAME = anjali308/train-schedule"
+        DOCKER_CREDENTIALS_ID = 'dockerhub-credentials'
+        KUBERNETES_CREDENTIALS_ID = 'kubernetes-credentials'
+        DOCKER_IMAGE_NAME = 'your-docker-image'
+        DOCKER_HUB_REPO = 'your-dockerhub-repo'
+        K8S_DEPLOYMENT_NAME = 'your-deployment'
     }
+
     stages {
-        stage('Build') {
+        stage('Checkout') {
             steps {
-                echo 'Running build automation'
-                sh './gradlew build --no-daemon'
-                archiveArtifacts artifacts: 'dist/trainSchedule.zip'
+                git 'https://github.com/your-username/cicd-pipeline-train-schedule-autodeploy.git'
             }
         }
+        
         stage('Build Docker Image') {
-            when {
-                branch 'master'
-            }
             steps {
                 script {
-                    app = docker.build(DOCKER_IMAGE_NAME)
-                    app.inside {
-                        sh 'echo Hello, World!'
-                    }
+                    docker.build("${DOCKER_HUB_REPO}/${DOCKER_IMAGE_NAME}:latest")
                 }
             }
         }
+        
         stage('Push Docker Image') {
-            when {
-                branch 'master'
-            }
             steps {
                 script {
-                    docker.withRegistry('https://registry.hub.docker.com', 'docker_hub_login') {
-                        app.push("${env.BUILD_NUMBER}")
-                        app.push("latest")
+                    docker.withRegistry('https://index.docker.io/v1/', "${DOCKER_CREDENTIALS_ID}") {
+                        docker.image("${DOCKER_HUB_REPO}/${DOCKER_IMAGE_NAME}:latest").push('latest')
                     }
                 }
             }
         }
-        stage('CanaryDeploy') {
-            when {
-                branch 'master'
-            }
-            environment { 
-                CANARY_REPLICAS = 1
-            }
+        
+        stage('Deploy to Kubernetes') {
             steps {
-                kubernetesDeploy(
-                    kubeconfigId: 'kubeconfig',
-                    configs: 'train-schedule-kube-canary.yml',
-                    enableConfigSubstitution: true
-                )
+                script {
+                    kubernetesDeploy(
+                        configs: 'k8s/deployment.yaml',
+                        kubeconfigId: "${KUBERNETES_CREDENTIALS_ID}"
+                    )
+                }
             }
         }
-        stage('DeployToProduction') {
-            when {
-                branch 'master'
-            }
-            environment { 
-                CANARY_REPLICAS = 0
-            }
-            steps {
-                input 'Deploy to Production?'
-                milestone(1)
-                kubernetesDeploy(
-                    kubeconfigId: 'kubeconfig',
-                    configs: 'train-schedule-kube-canary.yml',
-                    enableConfigSubstitution: true
-                )
-                kubernetesDeploy(
-                    kubeconfigId: 'kubeconfig',
-                    configs: 'train-schedule-kube.yml',
-                    enableConfigSubstitution: true
-                )
-            }
+    }
+    
+    post {
+        success {
+            echo 'Deployment was successful'
+        }
+        failure {
+            echo 'Deployment failed'
         }
     }
 }

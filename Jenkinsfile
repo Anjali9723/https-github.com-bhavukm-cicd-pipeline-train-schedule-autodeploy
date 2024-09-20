@@ -4,7 +4,7 @@ pipeline {
     environment {
         DOCKER_CREDENTIALS_ID = 'DockerID' 
         KUBERNETES_CREDENTIALS_ID = 'KubernetesID' 
-        DOCKER_IMAGE_NAME = 'devops'
+        DOCKER_IMAGE_NAME = 'devops2'
         DOCKER_HUB_REPO = 'anjali308'
         K8S_DEPLOYMENT_NAME = 'your-deployment'
     } 

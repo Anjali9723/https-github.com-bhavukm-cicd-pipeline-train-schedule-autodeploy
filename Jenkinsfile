@@ -28,7 +28,7 @@ pipeline {
             // Using withCredentials for better handling of sensitive information
             withCredentials([usernamePassword(credentialsId: 'DockerID', usernameVariable: 'anjali308', passwordVariable: 'Gow1110th@m')]) {
                 // Log in to Docker
-                sh 'echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin'
+                sh "echo \$Gow1110th@m | docker login -u \$anjali308 --password-stdin"
                 
                 // Tag the image
                 sh 'docker tag project/devops:latest index.docker.io/project/devops:latest'

@@ -37,18 +37,24 @@ pipeline {
                 }
             }
         }
+stage('Deploy to Kubernetes') {
+    steps {
+        script {
+            withCredentials([string(credentialsId: 'KUBERNETES_CREDENTIALS_ID', variable: 'KUBECONFIG_CONTENT')]) {
+                writeFile(file: 'kubeconfig', text: env.KUBECONFIG_CONTENT)
+                env.KUBECONFIG = 'kubeconfig'
+                
+                // Apply the Kubernetes deployment
+                sh 'kubectl apply -f deployment.yaml'
 
-        stage('Deploy to Kubernetes') {
-            steps {
-                script {
-                    withCredentials([string(credentialsId: KUBERNETES_CREDENTIALS_ID, variable: 'KUBECONFIG_CONTENT')]) {
-                        writeFile(file: 'kubeconfig', text: env.KUBECONFIG_CONTENT)
-                        env.KUBECONFIG = 'kubeconfig'
-                        sh 'kubectl apply -f deployment.yaml'
-                    }
-                }
+                // Optional: Clean up the kubeconfig file
+                sh 'rm -f kubeconfig'
             }
         }
+    }
+}
+
+        
     }
     
     post {

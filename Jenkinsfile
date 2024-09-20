@@ -20,7 +20,7 @@ pipeline {
             steps {
                 script {
                     // Fixed the image name syntax
-                    docker.build("${DOCKER_HUB_REPO}/${DOCKER_IMAGE_NAME}:latest")
+                    docker.build("${project}/${devops}:latest")
                 }
             }
         }
@@ -29,8 +29,8 @@ pipeline {
             steps {
                 script {
                     // Use the environment variable for credentials
-                    docker.withRegistry('https://index.docker.io/v1/', "${DOCKER_CREDENTIALS_ID}") {
-                        docker.image("${DOCKER_HUB_REPO}/${DOCKER_IMAGE_NAME}:latest").push('latest')
+                    docker.withRegistry('https://index.docker.io/v1/', "${DockerID}") {
+                        docker.image("${project}/${devops}:latest").push('latest')
                     }
                 }
             }
@@ -39,7 +39,7 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 script {
-                    withCredentials([string(credentialsId: KUBERNETES_CREDENTIALS_ID, variable: 'KUBECONFIG_CONTENT')]) {
+                    withCredentials([string(credentialsId: KubernetesID, variable: 'KUBECONFIG_CONTENT')]) {
                         writeFile(file: 'kubeconfig', text: env.KUBECONFIG_CONTENT)
 
                         env.KUBECONFIG = 'kubeconfig'

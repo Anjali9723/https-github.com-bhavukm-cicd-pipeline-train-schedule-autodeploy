@@ -19,10 +19,10 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    // Declare the variable here to make it accessible in the next stage
-                    def image = docker.build("${DOCKER_HUB_REPO}/${DOCKER_IMAGE_NAME}:latest")
-                    // Set it to the environment variable for future access
-                    env.DOCKER_IMAGE = image.getImageName()
+                    
+                    docker.build("${DOCKER_HUB_REPO}/${DOCKER_IMAGE_NAME}:latest")
+                   
+                    
                 }
             }
         }
@@ -30,9 +30,9 @@ pipeline {
         stage('Push Docker Image') {
             steps {
                 script {
-                    // Use the image variable for pushing
+                    
                     docker.withRegistry('https://index.docker.io/v1/', DOCKER_CREDENTIALS_ID) {
-                        docker.image(env.DOCKER_IMAGE).push('latest')
+                        docker.image("${DOCKER_HUB_REPO}/${DOCKER_IMAGE_NAME}:latest").push('latest')
                     }
                 }
             }

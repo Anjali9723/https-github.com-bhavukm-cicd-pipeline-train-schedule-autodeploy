@@ -22,7 +22,7 @@ pipeline {
                     // Declare the variable here to make it accessible in the next stage
                     def image = docker.build("${DOCKER_HUB_REPO}/${DOCKER_IMAGE_NAME}:latest")
                     // Set it to the environment variable for future access
-                    env.DOCKER_IMAGE = image.imageName
+                    env.DOCKER_IMAGE = image.getImageName()
                 }
             }
         }

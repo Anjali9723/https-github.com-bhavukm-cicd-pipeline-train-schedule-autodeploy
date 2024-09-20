@@ -4,11 +4,10 @@ pipeline {
     environment {
         DOCKER_CREDENTIALS_ID = 'dockerhub-credentials'
         KUBERNETES_CREDENTIALS_ID = 'kubernetes-credentials'
-        DOCKER_IMAGE_NAME = 'your-docker-image'
-        DOCKER_HUB_REPO = 'your-dockerhub-repo'
+        DOCKER_IMAGE_NAME = 'devops'
+        DOCKER_HUB_REPO = 'project'
         K8S_DEPLOYMENT_NAME = 'your-deployment'
-    }
-
+    
     stages {
         stage('Checkout') {
             steps {
@@ -19,7 +18,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    docker.build("${DOCKER_HUB_REPO}/${DOCKER_IMAGE_NAME}:latest")
+                    docker.build("${project}/${devops}:latest")
                 }
             }
         }
@@ -28,7 +27,7 @@ pipeline {
             steps {
                 script {
                     docker.withRegistry('https://index.docker.io/v1/', "${DOCKER_CREDENTIALS_ID}") {
-                        docker.image("${DOCKER_HUB_REPO}/${DOCKER_IMAGE_NAME}:latest").push('latest')
+                        docker.image("${project}/${devops}:latest").push('latest')
                     }
                 }
             }
@@ -38,7 +37,7 @@ pipeline {
             steps {
                 script {
                     kubernetesDeploy(
-                        configs: 'k8s/deployment.yaml',
+                        configs: 'deployment.yaml',
                         kubeconfigId: "${KUBERNETES_CREDENTIALS_ID}"
                     )
                 }

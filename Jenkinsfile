@@ -2,8 +2,8 @@ pipeline {
     agent any
     
     environment {
-        DOCKER_CREDENTIALS_ID = 'dockerhub-credentials'
-        KUBERNETES_CREDENTIALS_ID = 'kubernetes-credentials'
+        DOCKER_CREDENTIALS_ID = 'DockerID'
+        KUBERNETES_CREDENTIALS_ID = 'KubernetesID'
         DOCKER_IMAGE_NAME = 'devops'
         DOCKER_HUB_REPO = 'project'
         K8S_DEPLOYMENT_NAME = 'your-deployment'
@@ -11,7 +11,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/your-username/cicd-pipeline-train-schedule-autodeploy.git'
+                git ''
             }
         }
         
@@ -26,7 +26,7 @@ pipeline {
         stage('Push Docker Image') {
             steps {
                 script {
-                    docker.withRegistry('https://index.docker.io/v1/', "${DOCKER_CREDENTIALS_ID}") {
+                    docker.withRegistry('https://index.docker.io/v1/', "${DockerID}") {
                         docker.image("${project}/${devops}:latest").push('latest')
                     }
                 }
@@ -35,11 +35,16 @@ pipeline {
         
         stage('Deploy to Kubernetes') {
             steps {
-                script {
-                    kubernetesDeploy(
-                        configs: 'deployment.yaml',
-                        kubeconfigId: "${KUBERNETES_CREDENTIALS_ID}"
-                    )
+                script {withCredentials([string(credentialsId: 'KubernetesID', variable: 'KUBECONFIG_CONTENT')]) {
+                        
+                        writeFile(file: 'kubeconfig', text: env.KUBECONFIG_CONTENT)
+
+                        
+                        env.KUBECONFIG = 'kubeconfig'
+
+                        
+                        sh 'kubectl apply -f deployment.yaml'
+                    
                 }
             }
         }

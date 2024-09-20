@@ -19,7 +19,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    // Correcting the image name syntax
+                    // Define the image variable properly
                     def image = docker.build("${DOCKER_HUB_REPO}/${DOCKER_IMAGE_NAME}:latest")
                 }
             }
@@ -28,7 +28,7 @@ pipeline {
         stage('Push Docker Image') {
             steps {
                 script {
-                    // Use the environment variable for credentials
+                    // Use the image variable for pushing
                     docker.withRegistry('https://index.docker.io/v1/', DOCKER_CREDENTIALS_ID) {
                         image.push('latest')
                     }
@@ -61,6 +61,7 @@ pipeline {
     }
 }
 
+                    
         
        
         

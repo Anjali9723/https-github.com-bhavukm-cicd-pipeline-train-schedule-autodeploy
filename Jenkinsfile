@@ -15,12 +15,10 @@ pipeline {
                 git url: 'https://github.com/Anjali9723/https-github.com-bhavukm-cicd-pipeline-train-schedule-autodeploy.git', branch: 'main'
             }
         }
-        
         stage('Build Docker Image') {
             steps {
                 script {
-                    // Define the image variable properly
-                    def image = docker.build("${DOCKER_HUB_REPO}/${DOCKER_IMAGE_NAME}:latest")
+                    docker.build("${DOCKER_HUB_REPO}/${DOCKER_IMAGE_NAME}:latest")
                 }
             }
         }
@@ -28,13 +26,14 @@ pipeline {
         stage('Push Docker Image') {
             steps {
                 script {
-                    // Use the image variable for pushing
-                    docker.withRegistry('https://index.docker.io/v1/', DOCKER_CREDENTIALS_ID) {
-                        image.push('latest')
+                    docker.withRegistry('https://index.docker.io/v1/', "${DOCKER_CREDENTIALS_ID}") {
+                        docker.image("${DOCKER_HUB_REPO}/${DOCKER_IMAGE_NAME}:latest").push('latest')
                     }
                 }
             }
         }
+        
+        
         
         stage('Deploy to Kubernetes') {
             steps {

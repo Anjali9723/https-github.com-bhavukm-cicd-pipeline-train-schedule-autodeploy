@@ -22,26 +22,29 @@ pipeline {
                 }
             }
         }
-    stage('Build Docker Image') {
-            steps {
-                script {
-                    // Define the image variable properly
-                    def image = docker.build("${DOCKER_HUB_REPO}/${DOCKER_IMAGE_NAME}:latest")
-                }
+    
+      def image // Declare the variable outside
+
+stage('Build Docker Image') {
+    steps {
+        script {
+            // Build the Docker image and assign it to the variable
+            image = docker.build("${DOCKER_HUB_REPO}/${DOCKER_IMAGE_NAME}:latest")
+        }
+    }
+}
+
+stage('Push Docker Image') {
+    steps {
+        script {
+            // Use the image variable for pushing
+            docker.withRegistry('https://index.docker.io/v1/', DOCKER_CREDENTIALS_ID) {
+                image.push('latest')
             }
         }
-        
-        stage('Push Docker Image') {
-            steps {
-                script {
-                    // Use the image variable for pushing
-                    docker.withRegistry('https://index.docker.io/v1/', DOCKER_CREDENTIALS_ID) {
-                        image.push('latest')
-                    }
-                }
-            }
-        }    
-        
+    }
+}
+  
         
         
         stage('Deploy to Kubernetes') {

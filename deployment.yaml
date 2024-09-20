@@ -13,7 +13,7 @@ spec:
         app: your-app
     spec:
       containers:
-      - name: your-container
-        image: your-dockerhub-repo/your-docker-image:latest
+      - name: project
+        image: project/devops:latest
         ports:
         - containerPort: 80

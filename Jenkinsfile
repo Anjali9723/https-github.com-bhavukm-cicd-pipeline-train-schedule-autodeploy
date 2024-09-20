@@ -31,7 +31,7 @@ pipeline {
             steps {
                 script {
                     
-                    docker.withRegistry('https://index.docker.io/v1/', DOCKER_CREDENTIALS_ID) {
+                    docker.withRegistry('https://hub.docker.com', DOCKER_CREDENTIALS_ID) {
                         docker.image("${DOCKER_HUB_REPO}/${DOCKER_IMAGE_NAME}:latest").push('latest')
                     }
                 }

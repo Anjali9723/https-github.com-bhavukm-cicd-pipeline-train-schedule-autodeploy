@@ -2,12 +2,13 @@ pipeline {
     agent any
     
     environment {
-        DOCKER_CREDENTIALS_ID = 'DockerID'
-        KUBERNETES_CREDENTIALS_ID = 'KubernetesID'
+        DOCKER_CREDENTIALS_ID = 'DockerID' 
+        KUBERNETES_CREDENTIALS_ID = 'KubernetesID' 
         DOCKER_IMAGE_NAME = 'devops'
         DOCKER_HUB_REPO = 'project'
         K8S_DEPLOYMENT_NAME = 'your-deployment'
-    
+    } 
+
     stages {
         stage('Checkout') {
             steps {
@@ -18,7 +19,8 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    docker.build("${project}/${devops}:latest")
+                    // Fixed the image name syntax
+                    docker.build("${DOCKER_HUB_REPO}/${DOCKER_IMAGE_NAME}:latest")
                 }
             }
         }
@@ -26,8 +28,9 @@ pipeline {
         stage('Push Docker Image') {
             steps {
                 script {
-                    docker.withRegistry('https://index.docker.io/v1/', "${DockerID}") {
-                        docker.image("${project}/${devops}:latest").push('latest')
+                    // Use the environment variable for credentials
+                    docker.withRegistry('https://index.docker.io/v1/', "${DOCKER_CREDENTIALS_ID}") {
+                        docker.image("${DOCKER_HUB_REPO}/${DOCKER_IMAGE_NAME}:latest").push('latest')
                     }
                 }
             }
@@ -35,16 +38,14 @@ pipeline {
         
         stage('Deploy to Kubernetes') {
             steps {
-                script {withCredentials([string(credentialsId: 'KubernetesID', variable: 'KUBECONFIG_CONTENT')]) {
-                        
+                script {
+                    withCredentials([string(credentialsId: KUBERNETES_CREDENTIALS_ID, variable: 'KUBECONFIG_CONTENT')]) {
                         writeFile(file: 'kubeconfig', text: env.KUBECONFIG_CONTENT)
 
-                        
                         env.KUBECONFIG = 'kubeconfig'
 
-                        
                         sh 'kubectl apply -f deployment.yaml'
-                    
+                    }
                 }
             }
         }
@@ -59,4 +60,8 @@ pipeline {
         }
     }
 }
-    }
+
+
+        
+        
+        

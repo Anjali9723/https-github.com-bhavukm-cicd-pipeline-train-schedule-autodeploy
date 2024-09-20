@@ -22,16 +22,23 @@ pipeline {
                 }
             }
         }
-        
         stage('Push Docker Image') {
-            steps {
-                script {
-                    docker.withRegistry('https://index.docker.io/v1/', "${DOCKER_CREDENTIALS_ID}") {
-                        docker.image("${DOCKER_HUB_REPO}/${DOCKER_IMAGE_NAME}:latest").push('latest')
-                    }
-                }
+    steps {
+        script {
+            // Using withCredentials for better handling of sensitive information
+            withCredentials([usernamePassword(credentialsId: 'DockerID', usernameVariable: 'anjali308', passwordVariable: 'Gow1110th@m')]) {
+                // Log in to Docker
+                sh 'echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin'
+                
+                // Tag the image
+                sh 'docker tag project/devops:latest index.docker.io/project/devops:latest'
+                
+                // Push the image
+                sh 'docker push index.docker.io/project/devops:latest'
             }
         }
+    }
+}
         
         
         

@@ -19,8 +19,8 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    // Fixed the image name syntax
-                    docker.build("${project}/${devops}:latest")
+                    // Correcting the image name syntax
+                    def image = docker.build("${DOCKER_HUB_REPO}/${DOCKER_IMAGE_NAME}:latest")
                 }
             }
         }
@@ -29,8 +29,8 @@ pipeline {
             steps {
                 script {
                     // Use the environment variable for credentials
-                    docker.withRegistry('https://index.docker.io/v1/', "${DockerID}") {
-                        docker.image("${project}/${devops}:latest").push('latest')
+                    docker.withRegistry('https://index.docker.io/v1/', DOCKER_CREDENTIALS_ID) {
+                        image.push('latest')
                     }
                 }
             }
@@ -39,7 +39,7 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 script {
-                    withCredentials([string(credentialsId: KubernetesID, variable: 'KUBECONFIG_CONTENT')]) {
+                    withCredentials([string(credentialsId: KUBERNETES_CREDENTIALS_ID, variable: 'KUBECONFIG_CONTENT')]) {
                         writeFile(file: 'kubeconfig', text: env.KUBECONFIG_CONTENT)
 
                         env.KUBECONFIG = 'kubeconfig'
@@ -61,7 +61,8 @@ pipeline {
     }
 }
 
-
+        
+       
         
         
         

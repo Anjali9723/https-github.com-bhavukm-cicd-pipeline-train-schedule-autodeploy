@@ -16,4 +16,4 @@ spec:
       - name: project
         image: anjali308/devops:latest
         ports:
-        - containerPort: 80
+        - containerPort: 40

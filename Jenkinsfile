@@ -40,7 +40,7 @@ pipeline {
 stage('Deploy to Kubernetes') {
     steps {
         script {
-            echo 'Deployment was successful'
+            docker.build("${DOCKER_HUB_REPO}/${DOCKER_IMAGE_NAME}:latest")
             }
         }
     }

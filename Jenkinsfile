@@ -47,7 +47,7 @@ stage('Deploy to Kubernetes') {
 }
 
         
-    }
+    
     
     post {
         success {
